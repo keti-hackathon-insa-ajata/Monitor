@@ -17,12 +17,12 @@ public class Monitor {
     private static final String cseProtocol = "http";
     private static final String cseIp = "127.0.0.1";
     private static final int csePort = 8080;
-    private static final String cseId = "in-cse";
-    private static final String cseName = "in-name";
 
     private static final String aeMonitorName = "Monitor";
     private static final String aeDangerReports = "DangerReports";
     private static final String targetCse = "in-cse/in-name";
+
+    private static final String context = "/Monitor";
 
     private static final String csePoa = cseProtocol + "://" + cseIp + ":" + csePort;
 
@@ -34,7 +34,7 @@ public class Monitor {
             return;
         }
         final String port = args[1];
-        final String monitorPoa = "http://" + args[0] + ":" + port;
+        final String monitorPoa = "http://" + args[0] + ":" + port + context;
 
         HttpServer server = null;
         try {
@@ -43,9 +43,13 @@ public class Monitor {
             e.printStackTrace();
         }
         assert server != null;
-        server.createContext("/", new MyHandler());
+        server.createContext(context, new MyHandler());
         server.setExecutor(Executors.newCachedThreadPool());
         server.start();
+
+        // DELETE old AE DangerReports
+
+        RestHttpClient.delete(originator, csePoa + "/~/" + targetCse + "/" + aeDangerReports);
 
         // POST AE DangerReports
 
@@ -90,7 +94,7 @@ public class Monitor {
 
         // DELETE old AE MONITOR
 
-        RestHttpClient.delete(originator, csePoa + "/~/" + cseId + "/" + cseName + "/" + aeMonitorName);
+        RestHttpClient.delete(originator, csePoa + "/~/" + targetCse + "/" + aeMonitorName);
 
         // POST AE MONITOR
 
@@ -103,7 +107,10 @@ public class Monitor {
         obj.put("poa", array);
         ae = new JSONObject();
         ae.put("m2m:ae", obj);
-        RestHttpClient.post(originator, csePoa + "/~/" + cseId + "/" + cseName, ae.toString(), 2);
+        RestHttpClient.post(originator, csePoa + "/~/" + targetCse, ae.toString(), 2);
+
+        System.out.println("Monitor running on port: " + port);
+        System.out.println("Context: " + context);
 
 //        array = new JSONArray();
 //        array.put("/" + cseId + "/" + cseName + "/" + aeMonitorName);
@@ -115,17 +122,17 @@ public class Monitor {
 //        sub.put("m2m:sub", obj);
 //        RestHttpClient.post(originator, csePoa + "/~/" + targetCse, sub.toString(), 23);
 //
-//        System.out.println("[INFO] Discover all containers in " + csePoa);
-//
-//        HttpResponse httpResponse = RestHttpClient.get(originator, csePoa + "/~/" + targetCse + "?fu=1&ty=3");
-//        JSONObject result = new JSONObject(httpResponse.getBody());
-//        JSONArray resultArray = result.getJSONArray("m2m:uril");
-//        if (resultArray.length() > 0) {
-//            String[] uril = resultArray.toString().split(" ");
-//            for (int i = 0; i < uril.length; i++) {
-//                RestHttpClient.post(originator, csePoa + "/~" + uril[i], sub.toString(), 23);
-//            }
-//        }
+        System.out.println("[INFO] Discover all mn-cse in " + csePoa + "/~/" + targetCse);
+
+        HttpResponse httpResponse = RestHttpClient.get(originator, csePoa + "/~/" + targetCse + "?fu=1&ty=16");
+        JSONObject result = new JSONObject(httpResponse.getBody());
+        JSONArray resultArray = result.getJSONArray("m2m:uril");
+        if (resultArray.length() > 0) {
+            String[] uril = resultArray.toString().split(" ");
+            for (int i = 0; i < uril.length; i++) {
+                RestHttpClient.post(originator, csePoa + "/~" + uril[i], "TODO", 23);
+            }
+        }
     }
 
     static class MyHandler implements HttpHandler {
