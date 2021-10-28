@@ -21,20 +21,24 @@ public class Monitor {
     private static final String cseName = "in-name";
 
     private static final String aeMonitorName = "Monitor";
-    private static final String aeProtocol = "http";
-    private static final String aeIp = "127.0.0.1";
-    private static final int aePort = 1600;
     private static final String aeDangerReports = "DangerReports";
     private static final String targetCse = "in-cse/in-name";
 
     private static final String csePoa = cseProtocol + "://" + cseIp + ":" + csePort;
-    private static final String appPoa = aeProtocol + "://" + aeIp + ":" + aePort;
 
     public static void main(String[] args) {
 
+
+        if (args.length < 2) {
+            System.out.println("Arguments egs: 192.168.43.129 1600");
+            return;
+        }
+        final String port = args[1];
+        final String monitorPoa = "http://" + args[0] + ":" + port;
+
         HttpServer server = null;
         try {
-            server = HttpServer.create(new InetSocketAddress(aePort), 0);
+            server = HttpServer.create(new InetSocketAddress(Integer.parseInt(port)), 0);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -84,10 +88,14 @@ public class Monitor {
         cnt.put("m2m:cnt", obj);
         RestHttpClient.post(originator, csePoa + "/~/" + targetCse + "/" + aeDangerReports , cnt.toString(), 3);
 
+        // DELETE old AE MONITOR
+
+        RestHttpClient.delete(originator, csePoa + "/~/" + cseId + "/" + cseName + "/" + aeMonitorName);
+
         // POST AE MONITOR
 
         JSONArray array = new JSONArray();
-        array.put(appPoa);
+        array.put(monitorPoa);
         obj = new JSONObject();
         obj.put("rn", aeMonitorName);
         obj.put("api", "MONITOR");

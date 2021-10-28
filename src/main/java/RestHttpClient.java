@@ -60,4 +60,30 @@ public class RestHttpClient {
         System.out.println("HTTP Response "+httpResponse.getStatusCode()+"\n"+httpResponse.getBody());
         return httpResponse ;
     }
+
+    public static HttpResponse delete(String originator, String uri) {
+        System.out.println("HTTP DELETE "+uri+"\n");
+
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        HttpDelete httpDelete = new HttpDelete(uri);
+
+        httpDelete.addHeader("X-M2M-Origin",originator);
+
+        HttpResponse httpResponse = new HttpResponse();
+        try {
+            CloseableHttpResponse closeableHttpResponse=null;
+            try{
+                closeableHttpResponse = httpclient.execute(httpDelete);
+                httpResponse.setStatusCode(closeableHttpResponse.getStatusLine().getStatusCode());
+                httpResponse.setBody(EntityUtils.toString(closeableHttpResponse.getEntity()));
+
+            }finally{
+                closeableHttpResponse.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println("HTTP Response "+httpResponse.getStatusCode()+"\n"+httpResponse.getBody());
+        return httpResponse ;
+    }
 }
