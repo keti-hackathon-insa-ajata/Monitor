@@ -7,83 +7,144 @@ import org.apache.http.util.EntityUtils;
 
 public class RestHttpClient {
 
-    public static HttpResponse get(String originator, String uri) {
-        System.out.println("HTTP GET "+uri);
-        CloseableHttpClient httpclient = HttpClients.createDefault();
-        HttpGet httpGet= new HttpGet(uri);
+    public static String databaseUri;
+    private static boolean isDatabaseConnected;
 
-        httpGet.addHeader("X-M2M-Origin",originator);
-        httpGet.addHeader("Accept","application/json");
+    public static HttpResponse get(String originator, String uri) {
+        System.out.println("HTTP GET " + uri);
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(uri);
+
+        httpGet.addHeader("X-M2M-Origin", originator);
+        httpGet.addHeader("Accept", "application/json");
 
         HttpResponse httpResponse = new HttpResponse();
 
         try {
             CloseableHttpResponse closeableHttpResponse = httpclient.execute(httpGet);
-            try{
+            try {
                 httpResponse.setStatusCode(closeableHttpResponse.getStatusLine().getStatusCode());
                 httpResponse.setBody(EntityUtils.toString(closeableHttpResponse.getEntity()));
-            }finally{
+            } finally {
                 closeableHttpResponse.close();
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println("HTTP Response "+httpResponse.getStatusCode()+"\n"+httpResponse.getBody());
+        System.out.println("HTTP Response " + httpResponse.getStatusCode() + "\n" + httpResponse.getBody());
         return httpResponse;
     }
 
     public static HttpResponse post(String originator, String uri, String body, int ty) {
-        System.out.println("HTTP POST "+uri+"\n"+body);
+        System.out.println("HTTP POST " + uri + "\n" + body);
 
         CloseableHttpClient httpclient = HttpClients.createDefault();
         HttpPost httpPost = new HttpPost(uri);
 
-        httpPost.addHeader("X-M2M-Origin",originator);
-        httpPost.addHeader("Accept","application/json");
-        httpPost.addHeader("Content-Type","application/json;ty="+ty);
+        httpPost.addHeader("X-M2M-Origin", originator);
+        httpPost.addHeader("Accept", "application/json");
+        httpPost.addHeader("Content-Type", "application/json;ty=" + ty);
 
         HttpResponse httpResponse = new HttpResponse();
         try {
-            CloseableHttpResponse closeableHttpResponse=null;
-            try{
+            CloseableHttpResponse closeableHttpResponse = null;
+            try {
                 httpPost.setEntity(new StringEntity(body));
                 closeableHttpResponse = httpclient.execute(httpPost);
                 httpResponse.setStatusCode(closeableHttpResponse.getStatusLine().getStatusCode());
                 httpResponse.setBody(EntityUtils.toString(closeableHttpResponse.getEntity()));
 
-            }finally{
+            } finally {
                 closeableHttpResponse.close();
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println("HTTP Response "+httpResponse.getStatusCode()+"\n"+httpResponse.getBody());
-        return httpResponse ;
+        System.out.println("HTTP Response " + httpResponse.getStatusCode() + "\n" + httpResponse.getBody());
+        return httpResponse;
     }
 
     public static HttpResponse delete(String originator, String uri) {
-        System.out.println("HTTP DELETE "+uri+"\n");
+        System.out.println("HTTP DELETE " + uri + "\n");
 
         CloseableHttpClient httpclient = HttpClients.createDefault();
         HttpDelete httpDelete = new HttpDelete(uri);
 
-        httpDelete.addHeader("X-M2M-Origin",originator);
+        httpDelete.addHeader("X-M2M-Origin", originator);
 
         HttpResponse httpResponse = new HttpResponse();
         try {
-            CloseableHttpResponse closeableHttpResponse=null;
-            try{
+            CloseableHttpResponse closeableHttpResponse = null;
+            try {
                 closeableHttpResponse = httpclient.execute(httpDelete);
                 httpResponse.setStatusCode(closeableHttpResponse.getStatusLine().getStatusCode());
                 httpResponse.setBody(EntityUtils.toString(closeableHttpResponse.getEntity()));
 
-            }finally{
+            } finally {
                 closeableHttpResponse.close();
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println("HTTP Response "+httpResponse.getStatusCode()+"\n"+httpResponse.getBody());
-        return httpResponse ;
+        System.out.println("HTTP Response " + httpResponse.getStatusCode() + "\n" + httpResponse.getBody());
+        return httpResponse;
+    }
+
+    public static HttpResponse sendToDatabase(String body) {
+        if (!isDatabaseConnected) {
+            System.out.println("[WARNING] Database is not connected, we do not send to " + databaseUri);
+            return null;
+        }
+        System.out.println("HTTP POST " + databaseUri + "\n" + body);
+
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost(databaseUri);
+
+        httpPost.addHeader("Content-Type", "application/json");
+
+        HttpResponse httpResponse = new HttpResponse();
+        try {
+            CloseableHttpResponse closeableHttpResponse = null;
+            try {
+                httpPost.setEntity(new StringEntity(body));
+                closeableHttpResponse = httpclient.execute(httpPost);
+                httpResponse.setStatusCode(closeableHttpResponse.getStatusLine().getStatusCode());
+                httpResponse.setBody(EntityUtils.toString(closeableHttpResponse.getEntity()));
+
+            } finally {
+                closeableHttpResponse.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println("HTTP Response " + httpResponse.getStatusCode() + "\n" + httpResponse.getBody());
+        return httpResponse;
+    }
+
+    public static void verifyDatabaseConnection() {
+
+        System.out.println("HTTP GET " + databaseUri);
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(databaseUri);
+
+        HttpResponse httpResponse = new HttpResponse();
+
+        try {
+            CloseableHttpResponse closeableHttpResponse = httpclient.execute(httpGet);
+            try {
+                httpResponse.setStatusCode(closeableHttpResponse.getStatusLine().getStatusCode());
+                httpResponse.setBody(EntityUtils.toString(closeableHttpResponse.getEntity()));
+            } finally {
+                closeableHttpResponse.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (httpResponse.getStatusCode() != 200) {
+            System.out.println("[WARNING] Couldn't access database at " + databaseUri);
+            RestHttpClient.isDatabaseConnected = false;
+        } else {
+            RestHttpClient.isDatabaseConnected = true;
+        }
     }
 }
