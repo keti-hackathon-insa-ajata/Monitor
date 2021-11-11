@@ -21,7 +21,7 @@
     <build>
         <resources>
             <resource>
-                <directory>src/resources</directory>
+                <directory>src/main/resources</directory>
                 <excludes>
                     <exclude>**/*.properties</exclude>
                 </excludes>
@@ -45,12 +45,13 @@
                             <mainClass>Monitor</mainClass>
                         </manifest>
                         <manifestEntries>
-                            <Class-Path>config/</Class-Path>
+                            <Class-Path>.</Class-Path>
                         </manifestEntries>
                     </archive>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
+                    <outputDirectory>${basedir}/target/</outputDirectory>
                 </configuration>
             </plugin>
             <plugin>
@@ -64,10 +65,10 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${basedir}/target/config/</outputDirectory>
+                            <outputDirectory>${basedir}/target/</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>/src/resources/</directory>
+                                    <directory>/src/main/resources/</directory>
                                     <includes>
                                         <include>config.properties</include>
                                     </includes>

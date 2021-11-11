@@ -2,7 +2,7 @@
 ```
 mvn clean compile assembly:single
 ```
-
+NB : if after running this command, you cannot run Monitor.main(), run ```mvn clean``` 
 ## Run
 Argument : 
 ```

@@ -6,7 +6,7 @@ public class GetPropertyValues {
 
     public void getPropValues() throws Exception {
         try {
-            ResourceBundle bundle = ResourceBundle.getBundle("config", new Locale("en", "US"));
+            ResourceBundle bundle = ResourceBundle.getBundle("config");
             // get the properties' values
             Monitor.originator = bundle.getString("originator");
             Monitor.cseProtocol = bundle.getString("cseProtocol");
@@ -28,6 +28,7 @@ public class GetPropertyValues {
             Monitor.databaseUri = bundle.getString("databaseUri");
 
         } catch (MissingResourceException e) {
+            e.printStackTrace();
             throw new Exception("config/config.properties was not found");
         }
     }

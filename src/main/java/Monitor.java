@@ -65,6 +65,7 @@ public class Monitor {
                 String mnName = result2Object.getString("rn");
 
                 String mnCsePoa = poa.getString(0) + "~" + csi + "/" + mnName + "/";
+                String inCsePoa = poa.getString(0) + "~/" + targetCse;
 
                 // Once we got the poa we deploy the necessaray elements (if the poa is accessible)
 
@@ -124,7 +125,7 @@ public class Monitor {
                 JSONArray array = new JSONArray();
                 //array.put(mnCsePoa + aeMonitorName);
 //                array.put(csi + "/" + mnName + "/" + aeMonitorName);
-                array.put(targetCse + "/" + aeMonitorName);
+                array.put(inCsePoa + "/" + aeMonitorName);
                 obj = new JSONObject();
                 obj.put("nu", array);
                 obj.put("rn", subName);
