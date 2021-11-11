@@ -27,6 +27,9 @@ public class GetPropertyValues {
             Monitor.monitorPoa = "http://" + Monitor.monitorIp + ":" + Monitor.monitorPort + Monitor.monitorContext;
             RestHttpClient.databaseUri = bundle.getString("databaseUri");
 
+            Monitor.minRelativeSpeed = Integer.parseInt(bundle.getString("minRelativeSpeed"));
+            Monitor.maxDistance = Integer.parseInt(bundle.getString("maxDistance"));
+
         } catch (MissingResourceException e) {
             e.printStackTrace();
             throw new Exception("config/config.properties was not found");

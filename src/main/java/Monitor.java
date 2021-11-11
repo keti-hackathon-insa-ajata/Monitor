@@ -36,10 +36,22 @@ public class Monitor {
 
     public static String monitorPoa;
 
+    // Dangerous criteria
+
+    public static int minRelativeSpeed;
+    public static int maxDistance;
+
     private static final GetPropertyValues properties = new GetPropertyValues();
 
     private static void processData(JSONObject content) {
-        boolean dangerous = content.getDouble("object_speed") > 5.0;
+        double objectSpeed = content.getDouble("object_speed");
+        double bikeSpeed = content.getDouble("bicycle_speed");
+        double distance = content.getDouble("distance");
+        double relativeSpeed = objectSpeed - bikeSpeed;
+        boolean dangerous = (relativeSpeed > minRelativeSpeed || distance < maxDistance);
+        System.out.println((dangerous?"Dangerous : ":"Not dangerous : ") + "" +
+                "Relative speed : " + relativeSpeed + " and Distance : " + distance + "" +
+                " with Min relative speed : " + minRelativeSpeed + " and max distance : " + maxDistance);
         content.put("dangerous", dangerous);
     }
 
