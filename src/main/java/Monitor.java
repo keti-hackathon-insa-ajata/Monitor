@@ -13,23 +13,31 @@ import com.sun.net.httpserver.HttpServer;
 
 public class Monitor {
 
-    private static final String originator = "admin:admin";
-    private static final String cseProtocol = "http";
-    private static final String cseIp = "127.0.0.1";
-    private static final int csePort = 8080;
+    // OM2M
 
-    private static final String aeMonitorName = "Monitor";
-    private static final String aeDangerReports = "DangerReports";
-    private static final String aeAjataName = "AjataSensor";
-    private static final String subName = "AjataSub";
-    private static final String targetCse = "in-cse/in-name";
+    public static String originator;
+    public static String cseProtocol;
+    public static String inCseIp;
+    public static int inCsePort;
+    public static String targetCse;
 
-    private static final String context = "/Monitor";
+    public static String aeMonitorName;
+    public static String aeDangerReports;
+    public static String aeAjataName;
+    public static String subName;
 
-    private static final String csePoa = cseProtocol + "://" + cseIp + ":" + csePort;
+    public static String csePoa;
 
-    private static String port;
-    private static String monitorPoa;
+    // Monitor and database
+
+    public static String monitorIp;
+    public static int monitorPort;
+    public static String monitorContext;
+    public static String databaseUri;
+
+    public static String monitorPoa;
+
+    private static final GetPropertyValues properties = new GetPropertyValues();
 
     private static void processData(JSONObject content) {
         boolean dangerous = content.getDouble("object_speed") > 5.0;
@@ -115,7 +123,8 @@ public class Monitor {
 
                 JSONArray array = new JSONArray();
                 //array.put(mnCsePoa + aeMonitorName);
-                array.put(csi + "/" + mnName + "/" + aeMonitorName);
+//                array.put(csi + "/" + mnName + "/" + aeMonitorName);
+                array.put(targetCse + "/" + aeMonitorName);
                 obj = new JSONObject();
                 obj.put("nu", array);
                 obj.put("rn", subName);
@@ -124,65 +133,71 @@ public class Monitor {
                 sub.put("m2m:sub", obj);
                 RestHttpClient.post(originator, mnCsePoa + aeAjataName + "/DATA", sub.toString(), 23);
 
-                // DELETE old AE MONITOR
-
-                RestHttpClient.delete(originator, mnCsePoa + aeMonitorName);
-
-                // POST AE MONITOR
-
-                array = new JSONArray();
-                array.put(monitorPoa);
-                obj = new JSONObject();
-                obj.put("rn", aeMonitorName);
-                obj.put("api", "MONITOR");
-                obj.put("rr", true);
-                obj.put("poa", array);
-                ae = new JSONObject();
-                ae.put("m2m:ae", obj);
-                RestHttpClient.post(originator, mnCsePoa, ae.toString(), 2);
+//                // DELETE old AE MONITOR
+//
+//                RestHttpClient.delete(originator, mnCsePoa + aeMonitorName);
+//
+//                // POST AE MONITOR
+//
+//                array = new JSONArray();
+//                array.put(monitorPoa);
+//                obj = new JSONObject();
+//                obj.put("rn", aeMonitorName);
+//                obj.put("api", "MONITOR");
+//                obj.put("rr", true);
+//                obj.put("poa", array);
+//                ae = new JSONObject();
+//                ae.put("m2m:ae", obj);
+//                RestHttpClient.post(originator, mnCsePoa, ae.toString(), 2);
             }
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
-        final String argsFormat = "Argument format: (-d) monitor-ip port database-uri";
-        final String argsEgs = "Arguments egs: -d 192.168.43.129 1600 http://localhost:12345/dangerReports";
+        properties.getPropValues();
 
-        if (args.length < 3) {
-            System.out.println(argsFormat);
-            System.out.println(argsEgs);
-            return;
-        }
-
-        if (args[0].equals("-d")) {
-            if (args.length < 4) {
-                System.out.println(argsFormat);
-                System.out.println(argsEgs);
-                return;
-            }
-            port = args[2];
-            monitorPoa = "http://" + args[1] + ":" + port + context;
-            RestHttpClient.databaseUri = args[3];
+        // Deploy
+        if (args.length > 0 && args[0].equals("-d")) {
             Monitor.deploy();
-        } else {
-            port = args[1];
-            monitorPoa = "http://" + args[0] + ":" + port + context;
-            RestHttpClient.databaseUri = args[2];
         }
 
-        // Testing database connection
+//        final String argsFormat = "Argument format: (-d) monitor-ip port database-uri";
+//        final String argsEgs = "Arguments egs: -d 192.168.43.129 1600 http://localhost:12345/dangerReports\n" +
+//                "or: 1600 http://localhost:12345/dangerReports";
+//        try {
+//            if (args.length < 2) {
+//                throw new Exception(argsFormat + "\n" + argsEgs);
+//            }
+//            if (args[0].equals("-d")) {
+//                if (args.length != 4) {
+//                    throw new Exception(argsFormat + "\n" + argsEgs);
+//                }
+//                port = args[2];
+//                monitorPoa = "http://" + args[1] + ":" + port + context;
+//                RestHttpClient.databaseUri = args[3];
+//                Monitor.deploy();
+//            } else {
+//                port = args[0];
+//                RestHttpClient.databaseUri = args[1];
+//            }
+//        } catch (Exception e) {
+//            System.out.println(e);
+//            return;
+//        }
 
-        RestHttpClient.verifyDatabaseConnection();
+//        // Testing database connection
+//
+//        RestHttpClient.verifyDatabaseConnection();
 
         HttpServer server = null;
         try {
-            server = HttpServer.create(new InetSocketAddress(Integer.parseInt(port)), 0);
+            server = HttpServer.create(new InetSocketAddress(monitorPort), 0);
         } catch (IOException e) {
             e.printStackTrace();
         }
         assert server != null;
-        server.createContext(context, new MyHandler());
+        server.createContext(monitorContext, new MyHandler());
         server.setExecutor(Executors.newCachedThreadPool());
         server.start();
 
@@ -231,8 +246,25 @@ public class Monitor {
         cnt.put("m2m:cnt", obj);
         RestHttpClient.post(originator, csePoa + "/~/" + targetCse + "/" + aeDangerReports , cnt.toString(), 3);
 
-        System.out.println("Monitor running on port: " + port);
-        System.out.println("Context: " + context);
+        // DELETE old AE MONITOR
+
+        RestHttpClient.delete(originator, csePoa + "/~/" + targetCse + "/" + aeMonitorName);
+
+        // POST AE MONITOR
+
+        JSONArray array = new JSONArray();
+        array.put(monitorPoa);
+        obj = new JSONObject();
+        obj.put("rn", aeMonitorName);
+        obj.put("api", "MONITOR");
+        obj.put("rr", true);
+        obj.put("poa", array);
+        ae = new JSONObject();
+        ae.put("m2m:ae", obj);
+        RestHttpClient.post(originator, csePoa + "/~/" + targetCse, ae.toString(), 2);
+
+        System.out.println("Monitor running on port: " + monitorPort);
+        System.out.println("Context: " + monitorContext);
     }
 
     static class MyHandler implements HttpHandler {

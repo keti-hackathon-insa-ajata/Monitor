@@ -8,7 +8,7 @@ import org.apache.http.util.EntityUtils;
 public class RestHttpClient {
 
     public static String databaseUri;
-    private static boolean isDatabaseConnected;
+//    private static boolean isDatabaseConnected;
 
     public static HttpResponse get(String originator, String uri) {
         System.out.println("HTTP GET " + uri);
@@ -91,10 +91,10 @@ public class RestHttpClient {
     }
 
     public static HttpResponse sendToDatabase(String body) {
-        if (!isDatabaseConnected) {
-            System.out.println("[WARNING] Database is not connected, we do not send to " + databaseUri);
-            return null;
-        }
+//        if (!isDatabaseConnected) {
+//            System.out.println("[WARNING] Database is not connected, we do not send to " + databaseUri);
+//            return null;
+//        }
         System.out.println("HTTP POST " + databaseUri + "\n" + body);
 
         CloseableHttpClient httpclient = HttpClients.createDefault();
@@ -140,11 +140,11 @@ public class RestHttpClient {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        if (httpResponse.getStatusCode() != 200) {
-            System.out.println("[WARNING] Couldn't access database at " + databaseUri);
-            RestHttpClient.isDatabaseConnected = false;
-        } else {
-            RestHttpClient.isDatabaseConnected = true;
-        }
+//        if (httpResponse.getStatusCode() != 200) {
+//            System.out.println("[WARNING] Couldn't access database at " + databaseUri);
+//            RestHttpClient.isDatabaseConnected = false;
+//        } else {
+//            RestHttpClient.isDatabaseConnected = true;
+//        }
     }
 }
