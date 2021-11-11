@@ -33,7 +33,6 @@ public class Monitor {
     public static String monitorIp;
     public static int monitorPort;
     public static String monitorContext;
-    public static String databaseUri;
 
     public static String monitorPoa;
 
@@ -65,7 +64,6 @@ public class Monitor {
                 String mnName = result2Object.getString("rn");
 
                 String mnCsePoa = poa.getString(0) + "~" + csi + "/" + mnName + "/";
-                String inCsePoa = poa.getString(0) + "~/" + targetCse;
 
                 // Once we got the poa we deploy the necessaray elements (if the poa is accessible)
 
@@ -125,7 +123,10 @@ public class Monitor {
                 JSONArray array = new JSONArray();
                 //array.put(mnCsePoa + aeMonitorName);
 //                array.put(csi + "/" + mnName + "/" + aeMonitorName);
-                array.put(inCsePoa + "/" + aeMonitorName);
+//                array.put(inCsePoa + "/" + aeMonitorName);
+                array.put("/" + targetCse + "/" + aeMonitorName);
+//                array.put("/in-cse/in-name/Monitor/");
+//                array.put("/" + targetCse + "/" + aeMonitorName);
                 obj = new JSONObject();
                 obj.put("nu", array);
                 obj.put("rn", subName);
@@ -157,11 +158,6 @@ public class Monitor {
     public static void main(String[] args) throws Exception {
 
         properties.getPropValues();
-
-        // Deploy
-        if (args.length > 0 && args[0].equals("-d")) {
-            Monitor.deploy();
-        }
 
 //        final String argsFormat = "Argument format: (-d) monitor-ip port database-uri";
 //        final String argsEgs = "Arguments egs: -d 192.168.43.129 1600 http://localhost:12345/dangerReports\n" +
@@ -263,6 +259,11 @@ public class Monitor {
         ae = new JSONObject();
         ae.put("m2m:ae", obj);
         RestHttpClient.post(originator, csePoa + "/~/" + targetCse, ae.toString(), 2);
+
+        // Deploy
+        if (args.length > 0 && args[0].equals("-d")) {
+            Monitor.deploy();
+        }
 
         System.out.println("Monitor running on port: " + monitorPort);
         System.out.println("Context: " + monitorContext);

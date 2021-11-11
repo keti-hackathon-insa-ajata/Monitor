@@ -25,7 +25,7 @@ public class GetPropertyValues {
             Monitor.monitorPort = Integer.parseInt(bundle.getString("monitorPort"));
             Monitor.monitorContext = bundle.getString("monitorContext");
             Monitor.monitorPoa = "http://" + Monitor.monitorIp + ":" + Monitor.monitorPort + Monitor.monitorContext;
-            Monitor.databaseUri = bundle.getString("databaseUri");
+            RestHttpClient.databaseUri = bundle.getString("databaseUri");
 
         } catch (MissingResourceException e) {
             e.printStackTrace();
