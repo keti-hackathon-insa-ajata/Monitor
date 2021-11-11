@@ -4,11 +4,8 @@ mvn clean compile assembly:single
 ```
 
 ## Run
-Argument format: 
+Argument : 
 ```
-(-d) monitor-ip port database-uri
+-d : to deploy AE, etc... in all mn-cse
 ```
-Example:
-```
--d 192.168.43.129 1600 http://localhost:12345/dangerReports
-```
+NB : we can configure the Monitor with the file /config/config.properties
