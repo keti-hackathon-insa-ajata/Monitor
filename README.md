@@ -1,6 +1,18 @@
+# OM2M Monitor
+
+Monitor running on the central server to process data and send it to the central server database via the REST api
+
 ## Prerequisites 
+  * Git
   * Maven
   * Java 8
+
+## Git
+
+To retrieve the project, run :
+```
+git clone https://github.com/keti-hackathon-insa-ajata/Monitor.git
+```
 
 ## Build
 ```
