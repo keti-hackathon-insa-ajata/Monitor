@@ -1,6 +1,6 @@
 # OM2M Monitor
 
-Monitor running on the central server to process data and send it to the central server database via the REST api
+Monitor running on the central server to process data and send it to the central server database via the REST api (link between OM2M and the REST Api)
 
 ## Prerequisites 
   * Git
