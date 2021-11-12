@@ -48,6 +48,6 @@ maxDistance=100
 The most important fields are : 
   * the monitor's ip and port and context (the IP must correspond to the server's accessible IP) which will be accessed by the Raspberry Pi via OneM2M
   * the database's uri (here, we use localhost because the REST API is on the server aside with the Monitor)
-  * the dangerous criteria : 
+  * the dangerosity criteria : 
     * the minimum relative speed (in km/h)
     * the maximum distance between the vehicle and the bike (in cm) 
